@@ -130,6 +130,14 @@
 .badge.draft { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
 .badge.published { background: rgba(16, 185, 129, 0.15); color: var(--success); }
 .badge.lang-badge { background: rgba(99,102,241,0.15); color: var(--primary); text-transform: none; letter-spacing: normal; margin-top: 6px; }
+.badge.danger { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.icon-orange { color: var(--warning); }
+.gen-log-prompt {
+  white-space: pre-wrap; word-break: break-word; font-size: 0.8rem; line-height: 1.6;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
+  border-radius: 10px; padding: 14px; max-height: 360px; overflow-y: auto;
+  font-family: var(--font-mono, monospace); color: var(--text-muted);
+}
 
 .form-container { display: flex; flex-direction: column; gap: 24px; max-width: 800px; }
 .form-section { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 18px; padding: 24px; }

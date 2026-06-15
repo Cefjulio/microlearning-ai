@@ -12,7 +12,7 @@ import ModuleEditModal from '../../components/admin/ModuleEditModal';
 import LessonEditModal from '../../components/admin/LessonEditModal';
 import {
   ArrowLeft, Wand2, BookOpen, RefreshCw, CheckCircle, Edit3, Plus, Trash2, Settings2,
-  Save, X as XIcon, ChevronUp, ChevronDown, PlayCircle,
+  Save, X as XIcon, ChevronUp, ChevronDown, PlayCircle, History, AlertTriangle,
 } from 'lucide-react';
 
 export default function CourseManagerPage() {
@@ -34,6 +34,7 @@ export default function CourseManagerPage() {
   const [editingCourse, setEditingCourse] = useState(false);
   const [editingModule, setEditingModule] = useState<Module | null | 'new'>(null);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
+  const [viewingGenLog, setViewingGenLog] = useState<Lesson | null>(null);
 
   // Inline syllabus-topic editing
   const [inlineEditIdx, setInlineEditIdx] = useState<number | null>(null);
@@ -289,8 +290,11 @@ export default function CourseManagerPage() {
     const lessonId = `${moduleId}-${lessonIdx}`;
     setBuildingLessonId(lessonId);
 
+    const existingLesson = lessons[moduleId]?.find(l => l.order_index === lessonIdx);
+    const now = new Date().toISOString();
+
     try {
-      const { content, quiz } = await generateLesson(
+      const { content, quiz, prompt } = await generateLesson(
         aiSettings,
         course.topic,
         modules.find(m => m.id === moduleId)?.title ?? '',
@@ -301,13 +305,18 @@ export default function CourseManagerPage() {
       );
 
       const bgColor = pickColor(lessonIdx);
-      const existingLesson = lessons[moduleId]?.find(l => l.order_index === lessonIdx);
+      const genFields = {
+        last_generation_prompt: prompt,
+        last_generation_status: 'success' as const,
+        last_generation_error: null,
+        last_generation_at: now,
+      };
 
       let lesson: Lesson;
       if (existingLesson) {
         const { data } = await supabase
           .from('lessons')
-          .update({ title: sylLesson.title, content, quiz, background_color: bgColor, generated_at: new Date().toISOString(), status: 'published' })
+          .update({ title: sylLesson.title, content, quiz, background_color: bgColor, generated_at: now, status: 'published', ...genFields })
           .eq('id', existingLesson.id)
           .select()
           .single();
@@ -326,8 +335,9 @@ export default function CourseManagerPage() {
             content,
             quiz,
             background_color: bgColor,
-            generated_at: new Date().toISOString(),
+            generated_at: now,
             status: 'published',
+            ...genFields,
           })
           .select()
           .single();
@@ -338,7 +348,23 @@ export default function CourseManagerPage() {
         }));
       }
     } catch (err) {
-      alert('Failed to build lesson: ' + (err as Error).message);
+      const errorMsg = (err as Error).message;
+      alert('Failed to build lesson: ' + errorMsg);
+
+      if (existingLesson) {
+        const { data } = await supabase
+          .from('lessons')
+          .update({ last_generation_status: 'failed', last_generation_error: errorMsg, last_generation_at: now })
+          .eq('id', existingLesson.id)
+          .select()
+          .single();
+        if (data) {
+          setLessons(prev => ({
+            ...prev,
+            [moduleId]: prev[moduleId].map(l => l.id === data.id ? data : l)
+          }));
+        }
+      }
     }
     setBuildingLessonId(null);
   };
@@ -522,6 +548,34 @@ export default function CourseManagerPage() {
             />
           )}
 
+          {viewingGenLog && (
+            <div className="modal-overlay" onClick={() => setViewingGenLog(null)}>
+              <div className="modal-container" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h2>AI Generation Log — {viewingGenLog.title}</h2>
+                  <button className="btn-ghost btn-icon" onClick={() => setViewingGenLog(null)}><XIcon size={18} /></button>
+                </div>
+                <div className="modal-body">
+                  <p>
+                    <strong>Status:</strong>{' '}
+                    {viewingGenLog.last_generation_status === 'failed'
+                      ? <span className="badge danger">Failed</span>
+                      : <span className="badge published">Success</span>}
+                  </p>
+                  <p><strong>Run at:</strong> {viewingGenLog.last_generation_at ? new Date(viewingGenLog.last_generation_at).toLocaleString() : '—'}</p>
+                  {viewingGenLog.last_generation_error && (
+                    <p><strong>Error:</strong> {viewingGenLog.last_generation_error}</p>
+                  )}
+                  <p><strong>Prompt sent to AI:</strong></p>
+                  <pre className="gen-log-prompt">{viewingGenLog.last_generation_prompt}</pre>
+                </div>
+                <div className="modal-footer">
+                  <button className="btn-ghost" onClick={() => setViewingGenLog(null)}>Close</button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Syllabus + Lessons list */}
           {!activeSyllabus ? (
             <div className="empty-state small">
@@ -633,6 +687,17 @@ export default function CourseManagerPage() {
                       {builtLesson ? (
                         <>
                           <CheckCircle size={16} className="icon-green" />
+                          {builtLesson.last_generation_at && (
+                            <button
+                              className="btn-ghost btn-icon"
+                              onClick={() => setViewingGenLog(builtLesson)}
+                              title={`AI generation: ${builtLesson.last_generation_status} — click for details`}
+                            >
+                              {builtLesson.last_generation_status === 'failed'
+                                ? <AlertTriangle size={14} className="icon-orange" />
+                                : <History size={14} />}
+                            </button>
+                          )}
                           <button
                             className="btn-secondary btn-sm"
                             onClick={() => navigate(`/admin/preview/courses/${course.id}/lessons/${builtLesson.id}`)}

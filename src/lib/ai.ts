@@ -182,7 +182,7 @@ export async function generateLesson(
   lessonDescription: string,
   keyTopics: string[],
   contentLanguage: string = 'en'
-): Promise<{ content: LessonContent; quiz: QuizQuestion[] }> {
+): Promise<{ content: LessonContent; quiz: QuizQuestion[]; prompt: string }> {
   const langName = languageLabel(contentLanguage);
   const languageInstruction = contentLanguage === 'en'
     ? ''
@@ -320,12 +320,14 @@ Make all questions directly relevant to the lesson content and difficult as inst
 
   try {
     const text = await callLLM(settings, prompt, 8192);
-    return extractJSON<{ content: LessonContent; quiz: QuizQuestion[] }>(text);
+    const parsed = extractJSON<{ content: LessonContent; quiz: QuizQuestion[] }>(text);
+    return { ...parsed, prompt };
   } catch (e) {
     // AI JSON output is occasionally malformed (e.g. unescaped quotes); retry once.
     const text = await callLLM(settings, prompt, 8192);
     try {
-      return extractJSON<{ content: LessonContent; quiz: QuizQuestion[] }>(text);
+      const parsed = extractJSON<{ content: LessonContent; quiz: QuizQuestion[] }>(text);
+      return { ...parsed, prompt };
     } catch {
       throw e;
     }

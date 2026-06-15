@@ -143,6 +143,10 @@ export interface Lesson {
   status: 'draft' | 'published';
   generated_at: string | null;
   created_at: string;
+  last_generation_prompt: string | null;
+  last_generation_status: 'success' | 'failed' | null;
+  last_generation_error: string | null;
+  last_generation_at: string | null;
 }
 
 export interface Enrollment {
