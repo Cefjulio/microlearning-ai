@@ -11,6 +11,9 @@ interface AuthContextValue {
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
+  isAdminAccount: boolean;
+  viewMode: 'admin' | 'student';
+  toggleViewMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -19,6 +22,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'admin' | 'student'>(
+    (sessionStorage.getItem('viewMode') as 'admin' | 'student') ?? 'admin'
+  );
+
+  const toggleViewMode = () => {
+    setViewMode(prev => {
+      const next = prev === 'admin' ? 'student' : 'admin';
+      sessionStorage.setItem('viewMode', next);
+      return next;
+    });
+  };
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
@@ -71,7 +85,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signUp,
       signOut,
-      isAdmin: profile?.role === 'admin',
+      isAdmin: profile?.role === 'admin' && viewMode === 'admin',
+      isAdminAccount: profile?.role === 'admin',
+      viewMode,
+      toggleViewMode,
     }}>
       {children}
     </AuthContext.Provider>

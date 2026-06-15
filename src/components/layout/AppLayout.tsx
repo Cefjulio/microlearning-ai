@@ -1,13 +1,18 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, BookOpen, LogOut, Settings } from 'lucide-react';
+import { LayoutDashboard, BookOpen, LogOut, Settings, Eye, ShieldCheck } from 'lucide-react';
 
 export default function AppLayout() {
-  const { profile, signOut, isAdmin } = useAuth();
+  const { profile, signOut, isAdmin, isAdminAccount, viewMode, toggleViewMode } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const homePath = isAdmin ? '/admin' : '/';
+
+  const handleToggleView = () => {
+    toggleViewMode();
+    navigate(viewMode === 'admin' ? '/' : '/admin');
+  };
 
   return (
     <div className="app-container">
@@ -44,6 +49,11 @@ export default function AppLayout() {
                 <Settings size={16} /> AI Settings
               </button>
             </>
+          )}
+          {isAdminAccount && (
+            <button className="nav-link view-toggle" onClick={handleToggleView} title="Switch between Admin and Student views without logging out">
+              {viewMode === 'admin' ? <><Eye size={16} /> View as Student</> : <><ShieldCheck size={16} /> Back to Admin</>}
+            </button>
           )}
           <span className="nav-user">{profile?.full_name ?? 'User'}</span>
           <button className="nav-link" onClick={() => signOut()}>

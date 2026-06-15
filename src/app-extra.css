@@ -60,6 +60,8 @@
 .nav-link:hover { background: var(--bg-surface-hover); color: var(--text-main); }
 .nav-link.active { background: var(--primary); color: white; }
 .nav-user { color: var(--text-muted); font-size: 0.85rem; padding: 0 8px; }
+.view-toggle { background: rgba(99,102,241,0.15); color: var(--primary); }
+.view-toggle:hover { background: rgba(99,102,241,0.25); color: var(--primary); }
 
 .main-content { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 32px; }
 
