@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import QuizView from '../../components/student/QuizView';
 import Spinner from '../../components/shared/Spinner';
-import { ArrowLeft, BookOpen, Brain } from 'lucide-react';
+import { ArrowLeft, BookOpen, Brain, Volume2, Pause } from 'lucide-react';
 
 type Stage = 'lesson' | 'quiz' | 'done';
 
@@ -24,6 +24,7 @@ export default function LessonPage() {
   const [quizScore, setQuizScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [alreadyDone, setAlreadyDone] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   useEffect(() => {
     if (lessonId && user) fetchLesson();
@@ -91,6 +92,43 @@ export default function LessonPage() {
     setStage('done');
   };
 
+  useEffect(() => {
+    // Stop any reading when leaving the lesson view (e.g. moving to the quiz) or unmounting
+    if (stage !== 'lesson') {
+      window.speechSynthesis?.cancel();
+      setIsSpeaking(false);
+    }
+    return () => window.speechSynthesis?.cancel();
+  }, [stage]);
+
+  const toggleSpeech = () => {
+    if (!lesson?.content) return;
+    const synth = window.speechSynthesis;
+
+    if (isSpeaking) {
+      synth.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    const parts = [
+      lesson.content.summary,
+      lesson.content.explanation.replace(/[#*_`]/g, ''), // strip markdown symbols for cleaner reading
+      ...lesson.content.examples.map(ex => `${ex.title}. ${ex.content}`),
+      'Key points:',
+      ...lesson.content.key_points,
+    ];
+
+    const utterance = new SpeechSynthesisUtterance(parts.join('. '));
+    utterance.rate = 0.95;
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    synth.cancel();
+    synth.speak(utterance);
+    setIsSpeaking(true);
+  };
+
   if (loading) return <div className="page"><Spinner /></div>;
   if (!lesson) return <div className="page"><p>Lesson not found.</p></div>;
 
@@ -134,6 +172,10 @@ export default function LessonPage() {
           )}
 
           <div className="lesson-content-card">
+            <button className="btn-secondary listen-btn" onClick={toggleSpeech} style={{ borderColor: bgColor }}>
+              {isSpeaking ? <><Pause size={16} /> Stop Reading</> : <><Volume2 size={16} /> Listen to Lesson</>}
+            </button>
+
             <section className="lesson-section">
               <h2>Explanation</h2>
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
