@@ -196,13 +196,17 @@ export async function generateLesson(
       `For example, in an English course explained in Spanish: an example sentence like "She is reading a book" stays in English, ` +
       `but the explanation of why it's correct, and the quiz question asking the learner to identify it, should be written in Spanish.\n`;
 
-  const prompt = `You are an expert educational content creator specializing in microlearning. Generate a complete lesson with content and a 7-question quiz.
+  const prompt = `You are an expert educational content creator specializing in microlearning. Generate a complete lesson with content, an infographic, and a 10-question quiz.
 ${languageInstruction}
 Course: "${courseTopic}"
 Module: "${moduleTitle}"
 Lesson: "${lessonTitle}"
 Description: "${lessonDescription}"
 Key topics: ${keyTopics.join(', ')}
+
+QUIZ DIFFICULTY: All 10 quiz questions must be CHALLENGING — go beyond simple recall. Favor questions that require applying concepts, analyzing scenarios, comparing/contrasting, or spotting subtle distinctions and common misconceptions. Avoid questions answerable from the lesson title alone.
+
+INFOGRAPHIC: Design one infographic that visually summarizes the lesson's most important content (a process flow, key stats/figures, or a comparison). Pick whichever "type" best fits the lesson content.
 
 Return ONLY valid JSON with this exact structure (no markdown fences, no extra text):
 {
@@ -213,7 +217,17 @@ Return ONLY valid JSON with this exact structure (no markdown fences, no extra t
       { "title": "Example title", "content": "Concrete example with detail" },
       { "title": "Example title 2", "content": "Another example" }
     ],
-    "key_points": ["Key point 1", "Key point 2", "Key point 3", "Key point 4", "Key point 5"]
+    "key_points": ["Key point 1", "Key point 2", "Key point 3", "Key point 4", "Key point 5"],
+    "infographic": {
+      "title": "Short title for the infographic",
+      "type": "steps",
+      "items": [
+        { "label": "Step 1 name", "value": "Short headline", "description": "1 sentence detail" },
+        { "label": "Step 2 name", "value": "Short headline", "description": "1 sentence detail" },
+        { "label": "Step 3 name", "value": "Short headline", "description": "1 sentence detail" },
+        { "label": "Step 4 name", "value": "Short headline", "description": "1 sentence detail" }
+      ]
+    }
   },
   "quiz": [
     {
@@ -272,11 +286,35 @@ Return ONLY valid JSON with this exact structure (no markdown fences, no extra t
       "text": "Another true/false statement related to the lesson",
       "correct": false,
       "explanation": "Why this is false"
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q8",
+      "text": "A scenario-based question requiring applying a concept from the lesson?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correct_index": 1,
+      "explanation": "Why option B is correct, and why the others are common misconceptions"
+    },
+    {
+      "type": "multiple_choice",
+      "id": "q9",
+      "text": "A question testing a subtle distinction between two related concepts in the lesson?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correct_index": 3,
+      "explanation": "Why option D is correct"
+    },
+    {
+      "type": "fill_blank",
+      "id": "q10",
+      "text": "A harder fill-in-the-blank requiring synthesis of multiple ideas: ___",
+      "correct_answer": "answer",
+      "acceptable_answers": ["answer", "alternate phrasing"],
+      "explanation": "Why this is the answer"
     }
   ]
 }
 
-Make all questions directly relevant to the lesson content. The drag_drop correct_order array maps each item index to its correct position (0-based). Make content engaging, clear, and appropriate for microlearning.`;
+Make all questions directly relevant to the lesson content and difficult as instructed above. The drag_drop correct_order array maps each item index to its correct position (0-based). Make content engaging, clear, and appropriate for microlearning.`;
 
   const text = await callLLM(settings, prompt, 8192);
   return extractJSON<{ content: LessonContent; quiz: QuizQuestion[] }>(text);

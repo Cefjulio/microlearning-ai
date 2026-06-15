@@ -270,7 +270,10 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 0
 .journey-label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); text-align: center; max-width: 220px; }
 .journey-connector { width: 2px; height: 24px; background: var(--border-color); }
 
-.lesson-page { min-height: 100vh; }
+.lesson-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--lesson-bg) 0%, var(--lesson-bg) 280px, var(--bg-main) 620px, var(--bg-main) 100%);
+}
 .preview-banner {
   background: #FFD66B; color: #4A3300; font-weight: 700; font-size: 0.85rem;
   text-align: center; padding: 8px 16px; letter-spacing: 0.02em;
@@ -304,6 +307,27 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 0
 .key-point { background: rgba(99,102,241,0.08); border-radius: 10px; padding: 12px 16px; color: var(--text-main) !important; font-weight: 500; font-size: 0.9rem !important; position: relative; padding-left: 36px; }
 .key-point::before { content: "\2713"; position: absolute; left: 14px; color: var(--primary); font-weight: 800; }
 .lesson-cta { display: flex; justify-content: center; margin-top: 28px; }
+
+.infographic { display: flex; flex-direction: column; gap: 12px; }
+.infographic-stats, .infographic-comparison {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;
+}
+.infographic-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
+  border-left: 4px solid; border-radius: 12px; padding: 14px 16px;
+}
+.infographic-stats .infographic-item, .infographic-comparison .infographic-item {
+  flex-direction: column; gap: 4px;
+}
+.infographic-step-num {
+  flex: none; width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; color: rgba(0,0,0,0.75); font-size: 0.9rem;
+}
+.infographic-item-body h4 { color: var(--text-main); font-size: 0.95rem; margin-bottom: 2px; }
+.infographic-value { color: var(--text-main); font-weight: 700; font-size: 1.05rem; }
+.infographic-desc { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
 
 .quiz-view { max-width: 700px; margin: 0 auto; padding: 32px; }
 .quiz-progress { margin-bottom: 20px; }

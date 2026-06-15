@@ -155,6 +155,26 @@ export default function LessonPage() {
               </section>
             )}
 
+            {lesson.content.infographic && lesson.content.infographic.items?.length > 0 && (
+              <section className="lesson-section">
+                <h2>{lesson.content.infographic.title}</h2>
+                <div className={`infographic infographic-${lesson.content.infographic.type}`}>
+                  {lesson.content.infographic.items.map((item, i) => (
+                    <div key={i} className="infographic-item" style={{ borderColor: bgColor }}>
+                      {lesson.content!.infographic.type === 'steps' && (
+                        <div className="infographic-step-num" style={{ background: bgColor }}>{i + 1}</div>
+                      )}
+                      <div className="infographic-item-body">
+                        <h4>{item.label}</h4>
+                        <p className="infographic-value">{item.value}</p>
+                        {item.description && <p className="infographic-desc">{item.description}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {lesson.content.key_points.length > 0 && (
               <section className="lesson-section">
                 <h2>Key Points</h2>

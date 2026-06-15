@@ -110,11 +110,25 @@ export type QuizQuestion =
   | MatchQuestion
   | FillBlankQuestion;
 
+export interface InfographicItem {
+  label: string;
+  value: string;
+  description?: string;
+}
+
+export interface Infographic {
+  title: string;
+  /** 'steps' = numbered process flow, 'stats' = key figures/comparisons, 'comparison' = side-by-side items */
+  type: 'steps' | 'stats' | 'comparison';
+  items: InfographicItem[];
+}
+
 export interface LessonContent {
   summary: string;
   explanation: string;
   examples: { title: string; content: string }[];
   key_points: string[];
+  infographic: Infographic;
 }
 
 export interface Lesson {

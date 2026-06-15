@@ -21,7 +21,7 @@ export default function LessonEditModal({ lesson, onSave, onClose }: Props) {
   const [imageUrl, setImageUrl] = useState(lesson.image_url ?? '');
   const [status, setStatus] = useState(lesson.status);
   const [content, setContent] = useState<LessonContent>(
-    lesson.content ?? { summary: '', explanation: '', examples: [], key_points: [] }
+    lesson.content ?? { summary: '', explanation: '', examples: [], key_points: [], infographic: { title: '', type: 'stats', items: [] } }
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
