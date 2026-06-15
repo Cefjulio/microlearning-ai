@@ -432,24 +432,30 @@ export default function CourseManagerPage() {
         />
       </div>
 
-      {/* Module Tabs */}
-      <div className="module-tabs">
-        {modules.map(mod => (
-          <button
-            key={mod.id}
-            className={`module-tab ${activeTab === mod.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(mod.id)}
-          >
-            {mod.title}
-            {lessons[mod.id]?.length > 0 && (
-              <span className="tab-lesson-count">{lessons[mod.id].filter(l => l.status === 'published').length}/{syllabi[mod.id]?.content.lessons.length ?? 0}</span>
-            )}
+      {/* Module Sidebar + Content */}
+      <div className="course-layout">
+        {/* Sidebar */}
+        <div className="module-sidebar">
+          <p className="sidebar-label">Modules</p>
+          {modules.map(mod => (
+            <button
+              key={mod.id}
+              className={`module-sidebar-item ${activeTab === mod.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(mod.id)}
+            >
+              <span className="sidebar-item-title">{mod.title}</span>
+              {lessons[mod.id]?.length > 0 && (
+                <span className="tab-lesson-count">{lessons[mod.id].filter(l => l.status === 'published').length}/{syllabi[mod.id]?.content.lessons.length ?? 0}</span>
+              )}
+            </button>
+          ))}
+          <button className="module-sidebar-item add-item" onClick={() => setEditingModule('new')}>
+            <Plus size={14} /> Add Module
           </button>
-        ))}
-        <button className="module-tab add-tab" onClick={() => setEditingModule('new')}>
-          <Plus size={14} /> Add Module
-        </button>
-      </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="module-content">
 
       {editingModule && (
         <ModuleEditModal
@@ -759,6 +765,8 @@ export default function CourseManagerPage() {
           )}
         </div>
       )}
+        </div>{/* end module-content */}
+      </div>{/* end course-layout */}
     </div>
   );
 }

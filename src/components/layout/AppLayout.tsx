@@ -1,9 +1,11 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, BookOpen, LogOut, Settings, Eye, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, BookOpen, LogOut, Settings, Eye, ShieldCheck, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function AppLayout() {
   const { profile, signOut, isAdmin, isAdminAccount, viewMode, toggleViewMode } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -50,6 +52,9 @@ export default function AppLayout() {
               </button>
             </>
           )}
+          <button className="nav-link btn-icon" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
           {isAdminAccount && (
             <button className="nav-link view-toggle" onClick={handleToggleView} title="Switch between Admin and Student views without logging out">
               {viewMode === 'admin' ? <><Eye size={16} /> View as Student</> : <><ShieldCheck size={16} /> Back to Admin</>}

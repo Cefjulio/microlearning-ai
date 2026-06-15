@@ -48,6 +48,35 @@
   --grad-dark: linear-gradient(180deg, #13172d 0%, #0c0e1a 100%);
 }
 
+/* ── Light theme overrides ── */
+[data-theme="light"] {
+  --bg-main: #f1f3f8;
+  --bg-surface: rgba(255, 255, 255, 0.85);
+  --bg-surface-solid: #ffffff;
+  --bg-surface-hover: rgba(0, 0, 0, 0.05);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-glow: rgba(99, 102, 241, 0.25);
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --text-dark: #111827;
+  --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.06);
+  --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.1);
+  --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.12);
+}
+
+[data-theme="light"] body { background-color: var(--bg-main); color: var(--text-main); }
+[data-theme="light"] ::-webkit-scrollbar-track { background: #e5e7eb; }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); }
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background: rgba(0,0,0,0.03);
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder { color: #9ca3af; }
+
 * {
   box-sizing: border-box;
   margin: 0;
