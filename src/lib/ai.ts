@@ -204,6 +204,8 @@ Lesson: "${lessonTitle}"
 Description: "${lessonDescription}"
 Key topics: ${keyTopics.join(', ')}
 
+JSON VALIDITY: The output MUST be valid, parseable JSON. Any double-quote characters that appear inside string values (e.g. quoting a term or phrase) MUST be escaped as \\". Do not use literal smart/curly quotes anywhere. Avoid unescaped newlines inside string values — use \\n instead.
+
 QUIZ DIFFICULTY: All 10 quiz questions must be CHALLENGING — go beyond simple recall. Favor questions that require applying concepts, analyzing scenarios, comparing/contrasting, or spotting subtle distinctions and common misconceptions. Avoid questions answerable from the lesson title alone.
 
 INFOGRAPHIC: Design one infographic that visually summarizes the lesson's most important content (a process flow, key stats/figures, or a comparison). Pick whichever "type" best fits the lesson content.
@@ -316,6 +318,16 @@ Return ONLY valid JSON with this exact structure (no markdown fences, no extra t
 
 Make all questions directly relevant to the lesson content and difficult as instructed above. The drag_drop correct_order array maps each item index to its correct position (0-based). Make content engaging, clear, and appropriate for microlearning.`;
 
-  const text = await callLLM(settings, prompt, 8192);
-  return extractJSON<{ content: LessonContent; quiz: QuizQuestion[] }>(text);
+  try {
+    const text = await callLLM(settings, prompt, 8192);
+    return extractJSON<{ content: LessonContent; quiz: QuizQuestion[] }>(text);
+  } catch (e) {
+    // AI JSON output is occasionally malformed (e.g. unescaped quotes); retry once.
+    const text = await callLLM(settings, prompt, 8192);
+    try {
+      return extractJSON<{ content: LessonContent; quiz: QuizQuestion[] }>(text);
+    } catch {
+      throw e;
+    }
+  }
 }
