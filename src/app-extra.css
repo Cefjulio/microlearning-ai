@@ -316,6 +316,13 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 0
 .key-point::before { content: "\2713"; position: absolute; left: 14px; color: var(--primary); font-weight: 800; }
 .lesson-cta { display: flex; justify-content: center; margin-top: 28px; }
 .listen-btn { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; border-width: 2px; }
+.read-along {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
+  border-radius: 14px; padding: 16px 18px; margin-bottom: 24px;
+  line-height: 1.9; font-size: 0.95rem; color: var(--text-muted);
+  max-height: 220px; overflow-y: auto;
+}
+.read-along-word.active { color: rgba(0,0,0,0.85); font-weight: 700; border-radius: 4px; padding: 1px 2px; }
 
 .infographic { display: flex; flex-direction: column; gap: 12px; }
 .infographic-stats, .infographic-comparison {

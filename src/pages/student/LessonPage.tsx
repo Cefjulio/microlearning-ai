@@ -25,6 +25,8 @@ export default function LessonPage() {
   const [loading, setLoading] = useState(true);
   const [alreadyDone, setAlreadyDone] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [spokenWords, setSpokenWords] = useState<string[]>([]);
+  const [activeWordIdx, setActiveWordIdx] = useState(-1);
 
   useEffect(() => {
     if (lessonId && user) fetchLesson();
@@ -97,6 +99,7 @@ export default function LessonPage() {
     if (stage !== 'lesson') {
       window.speechSynthesis?.cancel();
       setIsSpeaking(false);
+      setActiveWordIdx(-1);
     }
     return () => window.speechSynthesis?.cancel();
   }, [stage]);
@@ -108,6 +111,7 @@ export default function LessonPage() {
     if (isSpeaking) {
       synth.cancel();
       setIsSpeaking(false);
+      setActiveWordIdx(-1);
       return;
     }
 
@@ -118,11 +122,31 @@ export default function LessonPage() {
       'Key points:',
       ...lesson.content.key_points,
     ];
+    const fullText = parts.join('. ');
 
-    const utterance = new SpeechSynthesisUtterance(parts.join('. '));
+    // Pre-split into words with their character start offsets, so we can map
+    // the speech engine's charIndex (onboundary) to a word for highlighting.
+    const words: string[] = [];
+    const wordStarts: number[] = [];
+    const wordRegex = /\S+/g;
+    let match: RegExpExecArray | null;
+    while ((match = wordRegex.exec(fullText)) !== null) {
+      words.push(match[0]);
+      wordStarts.push(match.index);
+    }
+    setSpokenWords(words);
+    setActiveWordIdx(-1);
+
+    const utterance = new SpeechSynthesisUtterance(fullText);
     utterance.rate = 0.95;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onboundary = (e) => {
+      if (e.name !== 'word' && e.name !== undefined) return;
+      let idx = wordStarts.findIndex(start => start > e.charIndex) - 1;
+      if (idx < 0) idx = wordStarts.length - 1;
+      setActiveWordIdx(idx);
+    };
+    utterance.onend = () => { setIsSpeaking(false); setActiveWordIdx(-1); };
+    utterance.onerror = () => { setIsSpeaking(false); setActiveWordIdx(-1); };
 
     synth.cancel();
     synth.speak(utterance);
@@ -175,6 +199,16 @@ export default function LessonPage() {
             <button className="btn-secondary listen-btn" onClick={toggleSpeech} style={{ borderColor: bgColor }}>
               {isSpeaking ? <><Pause size={16} /> Stop Reading</> : <><Volume2 size={16} /> Listen to Lesson</>}
             </button>
+
+            {isSpeaking && (
+              <div className="read-along">
+                {spokenWords.map((word, i) => (
+                  <span key={i} className={i === activeWordIdx ? 'read-along-word active' : 'read-along-word'} style={i === activeWordIdx ? { backgroundColor: bgColor } : undefined}>
+                    {word}{' '}
+                  </span>
+                ))}
+              </div>
+            )}
 
             <section className="lesson-section">
               <h2>Explanation</h2>
