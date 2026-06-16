@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
-  DndContext, closestCenter, type DragEndEvent, PointerSensor, useSensor, useSensors,
+  DndContext, closestCenter, type DragEndEvent,
+  MouseSensor, TouchSensor, useSensor, useSensors,
 } from '@dnd-kit/core';
 import {
   arrayMove, SortableContext, verticalListSortingStrategy, useSortable,
@@ -52,7 +53,10 @@ export default function DragDropQ({ question, onAnswer, answered, accentColor }:
   );
   const [submitted, setSubmitted] = useState(false);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
+  );
 
   const handleDragEnd = (event: DragEndEvent) => {
     if (submitted) return;
@@ -82,7 +86,7 @@ export default function DragDropQ({ question, onAnswer, answered, accentColor }:
   return (
     <div className="question-block">
       <h3 className="question-text">{question.text}</h3>
-      <p className="question-hint">Drag the items to put them in the correct order</p>
+      <p className="question-hint">Drag to reorder — on mobile, press and hold an item for a moment, then drag it</p>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>

@@ -426,7 +426,8 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 0
 }
 .drag-item.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
 .drag-item.incorrect { border-color: var(--error); background: rgba(239,68,68,0.1); }
-.drag-handle { color: var(--text-muted); display: flex; cursor: grab; }
+.drag-handle { color: var(--text-muted); display: flex; cursor: grab; touch-action: none; }
+.drag-item { touch-action: manipulation; }
 .drag-position { width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
 .drag-text { flex: 1; color: var(--text-main); font-size: 0.9rem; }
 
